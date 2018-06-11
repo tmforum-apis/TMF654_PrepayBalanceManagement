@@ -1,0 +1,3190 @@
+{
+  "basePath": "/tmf-api/prepayBalanceManagement/v2",
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "definitions": {
+    "BucketBalance": {
+      "description": "Represents and tracks the amount remained or owed for a certain type of service by certain customer",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique Identifier within the server for the bucket"
+        },
+        "href": {
+          "type": "string",
+          "description": "A resource URI pointing to the resource in the OB that stores the detailed information for the bucket"
+        },
+        "name": {
+          "type": "string",
+          "description": "Friendly name to identify the bucket"
+        },
+        "description": {
+          "type": "string",
+          "description": "Text describing the contents of the balance managed by the bucket"
+        },
+        "bucketType": {
+          "type": "string",
+          "description": "Type of prepay balance bucket (e.g.: promotion, deposit, bonus, data, voice, or any other service type …)"
+        },
+        "remainedAmount": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Amount remained in the bucket"
+        },
+        "reservedAmount": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Indicate the reserved amount on the bucket"
+        },
+        "validFor": {
+          "$ref": "#/definitions/TimePeriodType",
+          "description": "The period for which the balance in the bucket is valid"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status for the balance (active, expired, suspended)"
+        },
+        "product": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProductRefType"
+          },
+          "description": "A reference to the product whose consumption is managed by the bucket. This is an array to allow scenarios where a given bucket is shared between different products."
+        },
+        "partyAccount": {
+          "$ref": "#/definitions/PartyAccountRefType",
+          "description": "A reference to the account that owns the bucket"
+        },
+        "realizingResource": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RealizingResourceRefType"
+          },
+          "description": "A reference to the resource that realizes a product. This is an array to allow scenarios where a given bucket is shared between different resources."
+        },
+        "relatedParty": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RelatedPartyRefType"
+          },
+          "description": "Used to provide information about any other entity with relation to the balance, for instance to define customer hierarchy for the balance (e.g.: customerId, userId, …)"
+        }
+      },
+      "required": [
+        "id",
+        "href",
+        "bucketType",
+        "validFor",
+        "status",
+        "product"
+      ]
+    },
+    "AccumulatedBalance": {
+      "description": "Represents and tracks the aggregated amount remained or owed in certain account which is owned by certain customer for a set of buckets.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Friendly name to identify the aggregated balance"
+        },
+        "description": {
+          "type": "string",
+          "description": "Text describing the contents of the aggregated balance"
+        },
+        "totalBalance": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Aggregated for a set of prepay balance buckets associated to the product"
+        },
+        "bucket": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BucketBalanceRefType"
+          },
+          "description": "A reference to the buckets involved in the aggregation"
+        },
+        "product": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProductRefType"
+          },
+          "description": "A reference to the product whose consumption is managed by the bucket . This is an array to allow scenarios where a buckets are shared between different products"
+        },
+        "partyAccount": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PartyAccountRefType"
+          },
+          "description": "A reference to the account that owns the buckets aggregated"
+        },
+        "relatedParty": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RelatedPartyRefType"
+          },
+          "description": "Used to provide information about any other entity with relation to the balance, for instance to define customer hierarchy for the balance (e.g.: customerId, userId, …)"
+        }
+      },
+      "required": [
+        "name",
+        "totalBalance",
+        "bucket",
+        "product"
+      ]
+    },
+    "BalanceTopupRequest": {
+      "description": "Represents a detailed description of a recharge operation requested over a bucket (defined by a specific product or reference to a product (i.e.: a commercial id such as an msisidn) and a service type)",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique Identifier within the server for the recharge operation request"
+        },
+        "href": {
+          "type": "string",
+          "description": "A resource URI pointing to the resource in the OB that stores the detailed information. This is typically the resource url to retrieve individual top-up operation details"
+        },
+        "type": {
+          "type": "string",
+          "description": "A preconfigured value that describes a TopUp type which determines the prepay balance bucket in which the top-up is done (national-voice, roaming-voice, promotional-voice, data, ....)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the recharge operation"
+        },
+        "channel": {
+          "$ref": "#/definitions/ChannelRefType",
+          "description": "Indicator for the channel used to request the top-up operation. Structure including at least attribute “name”"
+        },
+        "requestor": {
+          "$ref": "#/definitions/RelatedPartyRefType",
+          "description": "Identifier for the user/customer/entity that performs the top-up action. This can be used to indicate the identifier of an agent that performs the operation on behalf of a user via a customer service channel. Structure including at least attributes “role” and “name”."
+        },
+        "amount": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Amount (can be monetary or non-monetary) to be recharged in the bucket"
+        },
+        "isAutoTopup": {
+          "type": "boolean",
+          "description": "Indicates if the topup requested is an autotopup (to be processed periodically)"
+        },
+        "recurringPeriod": {
+          "type": "string",
+          "description": "For autotopup indicates the periodicity for the recharge operation (monthly, weekly, …)"
+        },
+        "nrOfPeriods": {
+          "type": "integer",
+          "description": "For autotopup indicates the number of occurrences of the period the recharge operation must be executed. If not included then no limit is set to stop the executionof the topup every period"
+        },
+        "paymentMethod": {
+          "$ref": "#/definitions/PaymentMethodRefOrValueType",
+          "description": "Payment method used for the recharge operation (e.g.: cash, credit card, …). Structure including at least attribute “name”. Notice that the use of a voucher can be managed as a specific methodtype, where he voucher code can be passed as value."
+        },
+        "voucher": {
+          "type": "string",
+          "description": "Identifier for the voucher when the topup can be perfomed by this means (referenced by a voucher based payment mean). This attribute is left in this release to keep compatibility with previous version and for implementations that do not relay on paymentMethods. A voucher can be managed as a specific methodtype, where he voucher code can be passed as value."
+        },
+        "validFor": {
+          "$ref": "#/definitions/TimePeriodType",
+          "description": "The period defined for the recharged amount to be part of the prepay balance. This could be used to define expiration times to remove balance not consumed."
+        },
+        "requestedDate": {
+          "type": "string",
+          "description": "Date when the top-up request was received in the server"
+        },
+        "confirmationDate": {
+          "type": "string",
+          "description": "Date when the top-up was confirmed in the server"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "confirmed",
+            "cancelled",
+            "in progress"
+          ],
+          "description": "Status of the top-up operation Supported values are: - confirmed - cancelled - in progress"
+        },
+        "product": {
+          "$ref": "#/definitions/ProductRefType",
+          "description": "A reference to the product related to the bucket that is impacted by the balance related operation"
+        },
+        "bucket": {
+          "$ref": "#/definitions/BucketBalanceRefType",
+          "description": "A reference to the bucket impacted by the request. This is used in scenarios where the requestor knows beforehand the bucket that is going to be impacted instead of just referring to the commercial identifier of the impacted product and the type of bucket created under that product"
+        },
+        "partyAccount": {
+          "$ref": "#/definitions/PartyAccountRefType",
+          "description": "A reference to the account that owns the bucket impacted by the balance related operation"
+        },
+        "relatedParty": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RelatedPartyRefType"
+          },
+          "description": "Used to provide information about any other entity with relation to the operation"
+        }
+      },
+      "required": [
+        "id",
+        "href",
+        "type",
+        "channel",
+        "amount",
+        "validFor",
+        "requestedDate",
+        "confirmationDate",
+        "status",
+        "product"
+      ]
+    },
+    "BalanceTransferRequest": {
+      "description": "The BalanceTransfer resource is a detailed description of credit transfer operation requested between two buckets (reference to products owned by customers and consuming credit when using a service).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique Identifier within the server for the balance transfer operation request."
+        },
+        "href": {
+          "type": "string",
+          "description": "A resource URI pointing to the resource in the OB that stores the detailed information. This is typically the resource url to retrieve individual transfer operation details"
+        },
+        "type": {
+          "type": "string",
+          "description": "A preconfigured value that describes a TopUp type which determines the prepay balance bucket in which the top-up is done (national-voice, roaming-voice, promotional-voice, data, ....)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the transfer operation"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Text describing the reason for the adjustment"
+        },
+        "channel": {
+          "$ref": "#/definitions/ChannelRefType",
+          "description": "Indicator for the channel used to request the top-up operation. Structure including at least attribute “name”"
+        },
+        "requestor": {
+          "$ref": "#/definitions/RelatedPartyRefType",
+          "description": "Identifier for the user/customer/entity that performs the top-up action. This can be used to indicate the identifier of an agent that performs the operation on behalf of a user via a customer service channel. Structure including at least attributes “role” and “name”."
+        },
+        "targetId": {
+          "type": "string",
+          "description": "Identifier for the entity that receives the transfer (reference to a product via a commercial identifier such as an msisidn that relates to an internal product id)"
+        },
+        "targetType": {
+          "type": "string",
+          "description": "Intended for scenarios where the transfer is done from one bucket type to another (from voice to data). A preconfigured value that describes a Transfer type which determines the prepay balance bucket in which the transfer is done"
+        },
+        "receiver": {
+          "$ref": "#/definitions/RelatedPartyRefType",
+          "description": "Identifier for the user/customer/entity that receives the transfer action when it is required to indicate additional customer hierarchy information regarding the entity receiving the balance transfer"
+        },
+        "amount": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Amount (can be monetary or non-monetary) to be transferred"
+        },
+        "transferCost": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Associated cost to be charged for the transfer operation (can be monetary or non-monetary)"
+        },
+        "costOwner": {
+          "type": "string",
+          "enum": [
+            "originator",
+            "receiver"
+          ],
+          "description": "Indicates the entity responsible to assume the cost of the transfer operation"
+        },
+        "requestedDate": {
+          "type": "string",
+          "description": "Date when the transfer request was received in the server"
+        },
+        "confirmationDate": {
+          "type": "string",
+          "description": "Date when the transfer was confirmed in the server"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "confirmed",
+            "cancelled",
+            "in progress"
+          ],
+          "description": "Status of the top-up."
+        },
+        "product": {
+          "$ref": "#/definitions/ProductRefType",
+          "description": "A reference to the product related to the bucket that is impacted by the balance related operation"
+        },
+        "bucket": {
+          "$ref": "#/definitions/BucketBalanceRefType",
+          "description": "A reference to the bucket impacted by the request. This is used in scenarios where the requestor knows beforehand the bucket that is going to be impacted instead of just referring to the commercial identifier of the impacted product and the type of bucket created under that product"
+        },
+        "partyAccount": {
+          "$ref": "#/definitions/PartyAccountRefType",
+          "description": "A reference to the account that owns the bucket impacted by the balance related operation"
+        },
+        "relatedParty": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RelatedPartyRefType"
+          },
+          "description": "Used to provide information about any other entity with relation to the operation"
+        }
+      },
+      "required": [
+        "id",
+        "href",
+        "type",
+        "reason",
+        "channel",
+        "targetId",
+        "amount",
+        "requestedDate",
+        "confirmationDate",
+        "status",
+        "product"
+      ]
+    },
+    "BalanceAdjustmentRequest": {
+      "description": "the BalanceAdjustment resource is a detailed description of credit adjustment operation erformed on a given bucket (defined by a specific product or reference to a product (i.e.: a commercial id such as an msisidn) and a service type)",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique Identifier within the server for the balance adjustment operation request"
+        },
+        "href": {
+          "type": "string",
+          "description": "A resource URI pointing to the resource in the OB that stores the detailed information. This is typically the resource url to retrieve individual top-up operation details"
+        },
+        "type": {
+          "type": "string",
+          "description": "A preconfigured value that describes a TopUp type which determines the prepay balance bucket in which the top-up is done (national-voice, roaming-voice, promotional-voice, data, ....)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the recharge operation"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Text describing the reason for the adjustment"
+        },
+        "requestor": {
+          "$ref": "#/definitions/RelatedPartyRefType",
+          "description": "Identifier for the user/customer/entity that performs the top-up action. This can be used to indicate the identifier of an agent that performs the operation on behalf of a user via a customer service channel. Structure including at least attributes “role” and “name”."
+        },
+        "amount": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Amount (can be monetary or non-monetary) to be recharged in the bucket. It could refer to positive (increment) or negative (decrement) values"
+        },
+        "validFor": {
+          "$ref": "#/definitions/TimePeriodType",
+          "description": "The period defined for the adjusted amount to be part of the prepay balance. This could be used to define expiration times to remove balance not consumed."
+        },
+        "requestedDate": {
+          "type": "string",
+          "description": "Date when the top-up request was received in the server"
+        },
+        "product": {
+          "$ref": "#/definitions/ProductRefType",
+          "description": "A reference to the product related to the bucket that is impacted by the balance related operation"
+        },
+        "bucket": {
+          "$ref": "#/definitions/BucketBalanceRefType",
+          "description": "A reference to the bucket impacted by the request. This is used in scenarios where the requestor knows beforehand the bucket that is going to be impacted instead of just referring to the commercial identifier of the impacted product and the type of bucket created under that product"
+        },
+        "partyAccount": {
+          "$ref": "#/definitions/PartyAccountRefType",
+          "description": "A reference to the account that owns the bucket impacted by the balance related operation"
+        },
+        "relatedParty": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RelatedPartyRefType"
+          },
+          "description": "Used to provide information about any other entity with relation to the operation"
+        }
+      },
+      "required": [
+        "id",
+        "href",
+        "type",
+        "reason",
+        "amount",
+        "requestedDate",
+        "product"
+      ]
+    },
+    "BalanceActivity": {
+      "description": "The BalanceActivity resource is a detailed description of a specific balance-related action that has happened over a given bucket balance. Typically a recharge/transfer/adjustment request creates one activity, but a request for an auto-topup operation actually triggers multiple periodic balance-related activities.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "A preconfigured value that describes a type of balance-related performed (topup, transfer, adjustment)"
+        },
+        "date": {
+          "type": "string",
+          "description": "Date when the balance related operation took place"
+        },
+        "action": {
+          "$ref": "#/definitions/BalanceActionRequestRefType",
+          "description": "A reference to the balance-related operation that triggered the action"
+        },
+        "amount": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Amount (can be monetary or non-monetary) that was involved in the balance operation"
+        },
+        "bucketBalance": {
+          "$ref": "#/definitions/BucketBalanceRefType",
+          "description": "A reference to the bucket involved in the balance-related operation"
+        },
+        "amountBefore": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Remained amount in the bucket involved in the operation before it took place"
+        },
+        "amountAfter": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Remained amount in the bucket involved in the operation after it took place"
+        },
+        "product": {
+          "$ref": "#/definitions/ProductRefType",
+          "description": "A reference to the product related to the bucket that is impacted by the balance activity"
+        },
+        "partyAccount": {
+          "$ref": "#/definitions/PartyAccountRefType",
+          "description": "A reference to the account that owns the bucket impacted by the balance activity"
+        },
+        "relatedParty": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/RelatedPartyRefType"
+          },
+          "description": "Used to provide information about any other entity with relation to the balance activity"
+        }
+      },
+      "required": [
+        "type",
+        "date",
+        "action",
+        "amount",
+        "bucketBalance",
+        "product"
+      ]
+    },
+    "BalanceReserveRequest": {
+      "description": "The Balance Reserve Operation resource is a detailed description of a balance reserve operation requested over a bucket (defined by a specific product or reference to a product (i.e.: a commercial id such as an msisidn) and a service type)",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique Identifier within the server for the reserve operation request"
+        },
+        "href": {
+          "type": "string",
+          "description": "A resource URI pointing to the resource in the OB that stores the detailed information about a reserve"
+        },
+        "type": {
+          "type": "string",
+          "description": "A preconfigured value that describes a TopUp type which determines the prepay balance bucket in which the top-up is done (national-voice, roaming-voice, promotional-voice, data, ....)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the reserve operation"
+        },
+        "requestor": {
+          "$ref": "#/definitions/RelatedPartyRefType",
+          "description": "Identifier for the user/customer/entity that performs the top-up action. This can be used to indicate the identifier of an agent that performs the operation on behalf of a user via a customer service channel. Structure including at least attributes “role” and “name”."
+        },
+        "reservedAmount": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Amount (can be monetary or non-monetary) to be reserved in the bucket"
+        },
+        "remainedAmount": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Amount (can be monetary or non-monetary) to be remained in the bucket"
+        },
+        "isAutoDeduct": {
+          "type": "boolean",
+          "description": "Indicates if the reserved balance is auto deducted after a time period"
+        },
+        "validFor": {
+          "$ref": "#/definitions/TimePeriodType",
+          "description": "The period defined for the reserved amount. If reserve expires, the amount reserved will be deduct or unreserve by the value of isAutoDeduct parameter."
+        },
+        "requestedDate": {
+          "type": "string",
+          "description": "Date when the reserve request was received in the server"
+        },
+        "confirmationDate": {
+          "type": "string",
+          "description": "Date when the reserve was confirmed in the server"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            {
+              "0": "Success"
+            },
+            {
+              "1": "Message header checksum error, such as security check error, operator error, channel error, etc."
+            },
+            {
+              "2": "parameter range check error, such as not enter the business logic, but the field type, length, range check, the relationship between the parameters of the business association checksum"
+            },
+            {
+              "3": "user information check error, such as account, user, customer information related checksum error"
+            },
+            {
+              "4": "system internal error, such as system data error, system exception, etc."
+            },
+            {
+              "5": "service information check error, such as specific service information check error"
+            },
+            {
+              "6": "user information check error, such as repeat operation"
+            },
+            {
+              "7": "account information verification error, such as the balance is not enough"
+            },
+            {
+              "9999": "system other errors, can not be classified into the above"
+            }
+          ],
+          "description": "Status of the reserve operation"
+        },
+        "product": {
+          "$ref": "#/definitions/ProductRefType",
+          "description": "A reference to the product related to the bucket that is impacted by the balance related operation"
+        },
+        "bucket": {
+          "$ref": "#/definitions/BucketBalanceRefType",
+          "description": "A reference to the bucket impacted by the request. This is used in scenarios where the requestor knows beforehand the bucket that is going to be impacted instead of just referring to the commercial identifier of the impacted product and the type of bucket created under that product"
+        },
+        "partyAccount": {
+          "$ref": "#/definitions/PartyAccountRefType",
+          "description": "A reference to the account that owns the bucket impacted by the balance related operation"
+        },
+        "relatedParty": {
+          "$ref": "#/definitions/RelatedPartyRefType",
+          "description": "Used to provide information about any other entity with relation to the operation"
+        }
+      },
+      "required": [
+        "id",
+        "href",
+        "reservedAmount"
+      ]
+    },
+    "BalanceUnreserveRequest": {
+      "description": "The Balance Unreserve Operation resource is a detailed description of a balance unreserve operation requested over a product",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique Identifier within the server for the unreserve operation request"
+        },
+        "href": {
+          "type": "string",
+          "description": "A resource URI pointing to the resource in the OB that stores the detailed information about a unreserve"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the unreserve operation"
+        },
+        "requestedDate": {
+          "type": "string",
+          "description": "Date when the unreserve request was received in the server"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            {
+              "0": "Success"
+            },
+            {
+              "1": "Message header checksum error, such as security check error, operator error, channel error, etc."
+            },
+            {
+              "2": "parameter range check error, such as not enter the business logic, but the field type, length, range check, the relationship between the parameters of the business association checksum"
+            },
+            {
+              "3": "user information check error, such as account, user, customer information related checksum error"
+            },
+            {
+              "4": "system internal error, such as system data error, system exception, etc."
+            },
+            {
+              "5": "service information check error, such as specific service information check error"
+            },
+            {
+              "6": "user information check error, such as repeat operation"
+            },
+            {
+              "7": "account information verification error, such as the balance is not enough"
+            },
+            {
+              "9999": "system other errors, can not be classified into the above"
+            }
+          ],
+          "description": "Status of the unreserve operation"
+        },
+        "product": {
+          "$ref": "#/definitions/ProductRefType",
+          "description": "A reference to the product related to the bucket that is impacted by the balance related operation"
+        },
+        "bucket": {
+          "$ref": "#/definitions/BucketBalanceRefType",
+          "description": "A reference to the bucket impacted by the request. This is used in scenarios where the requestor knows beforehand the bucket that is going to be impacted instead of just referring to the commercial identifier of the impacted product and the type of bucket created under that product"
+        },
+        "relatedParty": {
+          "$ref": "#/definitions/RelatedPartyRefType",
+          "description": "Used to provide information about any other entity with relation to the operation"
+        },
+        "balanceReserve": {
+          "$ref": "#/definitions/BalanceReserveRefType",
+          "description": "A reference to the balancereserve that identifies the balance reserve operation"
+        }
+      },
+      "required": [
+        "id",
+        "href",
+        "balanceReserve"
+      ]
+    },
+    "BalanceDeductRequest": {
+      "description": "The Balance Deduct task resource is a detailed description of deduction operation. If balanceReserve Resource ID is contained in the deduct request message, the reserved balance will be performed deduct operation (if part of the reserved balance is deducted, the remaining amount will be released); if balanceReserve Resource ID is not contained in the deduct request message, the balance will be deducted directly.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique Identifier within the server for the deduction operation request"
+        },
+        "href": {
+          "type": "string",
+          "description": "A resource URI pointing to the resource in the OB that stores the detailed information about a deduction"
+        },
+        "type": {
+          "type": "string",
+          "description": "A preconfigured value that describes a deduct type which determines the prepay balance bucket in which the deduct is done (national-voice, roaming-voice, promotional-voice, data, ....)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the deduct operation"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Text describing the reason for the deduction"
+        },
+        "deductAmount": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Amount (can be monetary or non-monetary) to be deducted, if balancereserve ID is not Null, the operation is based on balancereserve resource; otherwise, the operation deducts directly amount given."
+        },
+        "requestor": {
+          "$ref": "#/definitions/RelatedPartyRefType",
+          "description": "Identifier for the user/customer/entity that performs the top-up action. This can be used to indicate the identifier of an agent that performs the operation on behalf of a user via a customer service channel. Structure including at least attributes “role” and “name”."
+        },
+        "requestedDate": {
+          "type": "string",
+          "description": "Date when the deduction request was received in the server"
+        },
+        "confirmationDate": {
+          "type": "string",
+          "description": "Date when the deduction was confirmed in the server"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            {
+              "0": "Success"
+            },
+            {
+              "1": "Message header checksum error, such as security check error, operator error, channel error, etc."
+            },
+            {
+              "2": "parameter range check error, such as not enter the business logic, but the field type, length, range check, the relationship between the parameters of the business association checksum"
+            },
+            {
+              "3": "user information check error, such as account, user, customer information related checksum error"
+            },
+            {
+              "4": "system internal error, such as system data error, system exception, etc."
+            },
+            {
+              "5": "service information check error, such as specific service information check error"
+            },
+            {
+              "6": "user information check error, such as repeat operation"
+            },
+            {
+              "7": "account information verification error, such as the balance is not enough"
+            },
+            {
+              "9999": "system other errors, can not be classified into the above"
+            }
+          ],
+          "description": "Status of the deduction operation"
+        },
+        "product": {
+          "$ref": "#/definitions/ProductRefType",
+          "description": "A reference to the product related to the bucket that is impacted by the balance related operation"
+        },
+        "bucket": {
+          "$ref": "#/definitions/BucketBalanceRefType",
+          "description": "A reference to the bucket impacted by the request. This is used in scenarios where the requestor knows beforehand the bucket that is going to be impacted instead of just referring to the commercial identifier of the impacted product and the type of bucket created under that product"
+        },
+        "partyAccount": {
+          "$ref": "#/definitions/PartyAccountRefType",
+          "description": "A reference to the account that owns the bucket impacted by the balance related operation"
+        },
+        "relatedParty": {
+          "$ref": "#/definitions/RelatedPartyRefType",
+          "description": "Used to provide information about any other entity with relation to the operation"
+        },
+        "balanceReserve": {
+          "$ref": "#/definitions/BalanceReserveRefType",
+          "description": "A reference to the balancereserve that identifies the balance reserve operation"
+        }
+      },
+      "required": [
+        "id",
+        "href",
+        "balanceReserve"
+      ]
+    },
+    "BalanceReserveRefType": {
+      "description": "link to the resource that holds reserved balance information",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the balance reserve entity"
+        },
+        "href": {
+          "type": "string",
+          "description": "A resource URI pointing to the resource in the OB that stores the reserve balance information for a bucket"
+        }
+      },
+      "required": [
+        "id",
+        "href"
+      ]
+    },
+    "BalanceActionRequestRefType": {
+      "description": "link to the resource that holds balance-related request information",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the balance related action request"
+        },
+        "href": {
+          "type": "string",
+          "description": "A resource URI pointing to the resource in the OB that stores the request information for the balance-related action"
+        }
+      },
+      "required": [
+        "id",
+        "href"
+      ]
+    },
+    "ChannelRefType": {
+      "description": "link to the resource that holds information about the channel used to initiate the topup operation request",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the channel entity"
+        },
+        "href": {
+          "type": "string",
+          "description": "A resource URI pointing to the resource in the OB that stores the channel information"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the channel"
+        }
+      },
+      "required": [
+        "id",
+        "href"
+      ]
+    },
+    "PaymentMethodRefOrValueType": {
+      "description": "link to the resource that holds information about the payment mean used to complete the operation",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the channel entity"
+        },
+        "href": {
+          "type": "string",
+          "description": "A resource URI pointing to the resource in the OB that stores the channel information"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the channel"
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of payment method (bankcard, voucher, …)"
+        },
+        "details": {
+          "$ref": "#/definitions/RelatedPartyRefType",
+          "description": "The list of parameters depends on the type of payment method"
+        }
+      },
+      "required": [
+        "id",
+        "href"
+      ]
+    },
+    "BalanceTopupStatusType": {
+      "description": "Structure including specific information about change of status for the topup operation",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Current status of the operation request"
+        },
+        "statusChangeDate": {
+          "type": "string",
+          "description": "Date in which the latest change of status was requested"
+        }
+      },
+      "required": [
+        "status",
+        "statusChangeDate"
+      ]
+    },
+    "BucketBalanceRefType": {
+      "description": "link to the resource that holds bucket balance information",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the bucket entity"
+        },
+        "href": {
+          "type": "string",
+          "description": "A resource URI pointing to the resource in the OB that stores the balance information for a bucket"
+        }
+      },
+      "required": [
+        "id",
+        "href"
+      ]
+    },
+    "ProductRefType": {
+      "description": "Representation of a resource that holds information about the product that is linked to the bucket balance.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the product entity"
+        },
+        "href": {
+          "type": "string",
+          "description": "A resource URI pointing to the resource in the OB that stores the product information"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the product"
+        }
+      },
+      "required": [
+        "id",
+        "href"
+      ]
+    },
+    "QuantityType": {
+      "description": "Representation of a quantity of something. I can also be used to represent a quantity range",
+      "properties": {
+        "amount": {
+          "format": "decimal",
+          "type": "number",
+          "description": "Measured amount"
+        },
+        "units": {
+          "type": "string",
+          "description": "Units the quantity is measured in"
+        }
+      },
+      "required": [
+        "units",
+        "amount"
+      ]
+    },
+    "TimePeriodType": {
+      "description": "Representation of a time period",
+      "properties": {
+        "startDateTime": {
+          "format": "date-time",
+          "type": "string",
+          "description": "Start date of the period"
+        },
+        "endDateTime": {
+          "format": "date-time",
+          "type": "string",
+          "description": "End date of the period"
+        }
+      },
+      "required": [
+        "startDateTime"
+      ]
+    },
+    "PartyAccountRefType": {
+      "description": "Information about a resource that holds information about the account that owns the bucket",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the account entity"
+        },
+        "href": {
+          "type": "string",
+          "description": "A resource URI pointing to the resource in the OB that stores the account information"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the account"
+        }
+      },
+      "required": [
+        "id",
+        "href"
+      ]
+    },
+    "RelatedPartyRefType": {
+      "description": "Information about an associated entity and its role",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the account entity"
+        },
+        "href": {
+          "type": "string",
+          "description": "A resource URI pointing to the resource in the OB that stores the account information"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the account"
+        },
+        "role": {
+          "type": "string",
+          "description": "Role describing the relationship with the related element"
+        }
+      },
+      "required": [
+        "role",
+        "name"
+      ]
+    },
+    "RealizingResourceRefType": {
+      "description": "Information about a resource that holds realizes the product that is linked to the bucket balance",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier of the related party"
+        },
+        "href": {
+          "type": "string",
+          "description": "Reference to the party"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the resource"
+        },
+        "@Type": {
+          "type": "string",
+          "description": "Indicates the type of resource"
+        },
+        "value": {
+          "type": "string",
+          "description": "The resource value that can be used to identify a resource with a public key (e.g.: a tel nr, an msisdn)"
+        }
+      }
+    },
+    "NotificationRequest": {
+      "properties": {
+        "callback": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "callback"
+      ]
+    },
+    "NotificationResponse": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "callback": {
+          "type": "string"
+        },
+        "query": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "callback",
+        "query"
+      ]
+    },
+    "ListenerRequest": {
+      "properties": {
+        "eventId": {
+          "type": "string"
+        },
+        "eventType": {
+          "type": "string"
+        },
+        "event": {
+          "$ref": "#/definitions/NotificationResponse"
+        }
+      },
+      "required": [
+        "eventId",
+        "eventType",
+        "event"
+      ]
+    }
+  },
+  "host": "serverRoot",
+  "info": {
+    "description": "This is a sample representation of the Prepay Balance Management TMForum API. It is important to bear in mind that swagger 2.0 does not properly support polymorphism, so the link between the payment method details and its data types should be looked up in the API specification pdf file.",
+    "title": "Prepay Balance Management",
+    "version": "2.0.4"
+  },
+  "paths": {
+    "/bucket": {
+      "get": {
+        "operationId": "retrieveBuckets",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "product.id",
+            "required": true,
+            "in": "query",
+            "description": "Id of the product",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Balance information was returned successfully",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BucketBalance"
+              }
+            },
+            "headers": {
+              "X-Total-Count": {
+                "description": "Total results",
+                "type": "integer"
+              }
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "Retrieve balance information stored in the server that can be filtered for specific criteria.",
+        "tags": [
+          "Balance Buckets Methods"
+        ]
+      }
+    },
+    "/bucket/{bucketId}": {
+      "get": {
+        "operationId": "retrieveBucket",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "bucketId",
+            "required": true,
+            "in": "path",
+            "description": "Id of the bucket to fetch",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Balance information was returned successfully",
+            "schema": {
+              "$ref": "#/definitions/BucketBalance"
+            },
+            "headers": {
+              "X-Total-Count": {
+                "description": "Total results",
+                "type": "integer"
+              }
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "Retrieve balance information stored in the server for a specific bucket.",
+        "tags": [
+          "Balance Buckets Methods"
+        ]
+      }
+    },
+    "/product/{productId}/bucket": {
+      "get": {
+        "operationId": "retrieveBucketsOfProduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "bucketType",
+            "required": false,
+            "in": "query",
+            "description": "Description of the bucket type",
+            "type": "string"
+          },
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Id of the product",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Balance information was returned successfully",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BucketBalance"
+              }
+            },
+            "headers": {
+              "X-Total-Count": {
+                "description": "Total results",
+                "type": "integer"
+              }
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "Retrieve balance information stored in the server that can be filtered for specific criteria.",
+        "tags": [
+          "Balance Buckets Methods"
+        ]
+      }
+    },
+    "/product/{productId}/bucket/{bucketId}": {
+      "get": {
+        "operationId": "retrieveBucketofproduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "bucketId",
+            "required": true,
+            "in": "path",
+            "description": "Id of the bucket to fetch",
+            "type": "string"
+          },
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "description": "Id of the bucket to fetch",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Balance information was returned successfully",
+            "schema": {
+              "$ref": "#/definitions/BucketBalance"
+            },
+            "headers": {
+              "X-Total-Count": {
+                "description": "Total results",
+                "type": "integer"
+              }
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "Retrieve balance information stored in the server for a specific bucket.",
+        "tags": [
+          "Balance Buckets Methods"
+        ]
+      }
+    },
+    "/accumulatedbalance": {
+      "get": {
+        "operationId": "retrieveAccumulatedBalance",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "query",
+            "description": "Id of the product",
+            "type": "string"
+          },
+          {
+            "name": "product.id",
+            "required": true,
+            "in": "query",
+            "description": "Id of the product",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Balance information was returned successfully",
+            "schema": {
+              "$ref": "#/definitions/AccumulatedBalance"
+            },
+            "headers": {
+              "X-Total-Count": {
+                "description": "Total results",
+                "type": "integer"
+              }
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "retrieve total balance information for an aggregation of a set of buckets",
+        "tags": [
+          "Accumulated Balances Methods"
+        ]
+      }
+    },
+    "/accumulatedbalance/{productId}": {
+      "get": {
+        "operationId": "retrieveAccumulatedBalanceOfProduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Balance information was returned successfully",
+            "schema": {
+              "$ref": "#/definitions/AccumulatedBalance"
+            },
+            "headers": {
+              "X-Total-Count": {
+                "description": "Total results",
+                "type": "integer"
+              }
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "retrieve total balance information for an aggregation of a set of buckets",
+        "tags": [
+          "Accumulated Balances Methods"
+        ]
+      }
+    },
+    "/balanceActivity": {
+      "get": {
+        "operationId": "retrieveBalanceActivityOfProduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "prod.id",
+            "required": true,
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Balance information was returned successfully",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BalanceActivity"
+              }
+            },
+            "headers": {
+              "X-Total-Count": {
+                "description": "Total results",
+                "type": "integer"
+              }
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "retrieve total balance information for an aggregation of a set of buckets",
+        "tags": [
+          "Balance Activity Methods"
+        ]
+      }
+    },
+    "/product/{productId}/balanceActivity": {
+      "get": {
+        "operationId": "retrieveBalanceActivityProduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Balance information was returned successfully",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BalanceActivity"
+              }
+            },
+            "headers": {
+              "X-Total-Count": {
+                "description": "Total results",
+                "type": "integer"
+              }
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "retrieve total balance information for an aggregation of a set of buckets",
+        "tags": [
+          "Balance Activity Methods"
+        ]
+      }
+    },
+    "/balanceTopup": {
+      "post": {
+        "operationId": "createNewTopup",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "TopupBody",
+            "in": "body",
+            "description": "The Topup to be created.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceTopupRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful top-up operation request (resource created)",
+            "headers": {
+              "location": {
+                "description": "Location where to query the created topup",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Create a new top-up operation for a given product (or commercial id reference to a product) instance consuming the credit held in a bucket for a specific service) .",
+        "tags": [
+          "Balance TopUps Methods"
+        ]
+      },
+      "get": {
+        "operationId": "retrieveListTopUpOperations",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "product.id",
+            "required": true,
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "channel",
+            "required": false,
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "TopUp request information was returned successfully",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BalanceTopupRequest"
+              }
+            },
+            "headers": {
+              "X-Total-Count": {
+                "description": "Total results",
+                "type": "integer"
+              }
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "retrieve the list of top-up operations requested for a given product product (or commercial id reference to a product), filtered by given criteria. The response includes the details of all top-ups operations requested.",
+        "tags": [
+          "Balance TopUps Methods"
+        ]
+      }
+    },
+    "/{idProduct}/balanceTopup": {
+      "post": {
+        "operationId": "createNewTopupOfProduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "idProduct",
+            "type": "string",
+            "in": "path",
+            "description": "The id to be created.",
+            "required": true
+          },
+          {
+            "name": "TopupBody",
+            "in": "body",
+            "description": "The Topup to be created.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceTopupRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful top-up operation request (resource created)",
+            "headers": {
+              "location": {
+                "description": "Location where to query the created topup",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Create a new top-up operation for a given product (or commercial id reference to a product) instance consuming the credit held in a bucket for a specific service) .",
+        "tags": [
+          "Balance TopUps Methods"
+        ]
+      }
+    },
+    "/product/{productId}/balanceTopups": {
+      "get": {
+        "operationId": "retrieveTopupByProduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "information successfully retrieved",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BalanceTopupRequest"
+              }
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "retrieve detailed information about a single top-up operation previously processed by the server.",
+        "tags": [
+          "Balance TopUps Methods"
+        ]
+      }
+    },
+    "/balanceTopup/{topupId}": {
+      "get": {
+        "operationId": "retrieveTopup",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "topupId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "information successfully retrieved",
+            "schema": {
+              "$ref": "#/definitions/BalanceTopupRequest"
+            },
+            "headers": {
+              "X-Total-Count": {
+                "description": "Total results",
+                "type": "integer"
+              }
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "retrieve detailed information about a single top-up operation previously processed by the server.",
+        "tags": [
+          "Balance TopUps Methods"
+        ]
+      },
+      "patch": {
+        "operationId": "PartiallyModifyTopup",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "topupId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "TopupBody",
+            "in": "body",
+            "description": "The Topup to be modify.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceTopupRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful top-up operation request (resource modified)"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Partially update the information about a single top-up operation previously processed by the server.",
+        "tags": [
+          "Balance TopUps Methods"
+        ]
+      },
+      "put": {
+        "operationId": "ModifyTopup",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "topupId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "TopupBody",
+            "in": "body",
+            "description": "The Topup to be modify.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceTopupRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful top-up operation request (resource modified)"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Update the information about a single top-up operation previously processed by the server.",
+        "tags": [
+          "Balance TopUps Methods"
+        ]
+      }
+    },
+    "/balanceTopup/{topupId}/status": {
+      "get": {
+        "operationId": "retrieveTopupStatus",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "topupId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "information successfully retrieved",
+            "schema": {
+              "$ref": "#/definitions/BalanceTopupStatusType"
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "retrieve detailed information about a single top-up operation previously processed by the server.",
+        "tags": [
+          "Balance TopUps Methods"
+        ]
+      },
+      "put": {
+        "operationId": "ModifyTopupStatus",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "topupId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "TopupBody",
+            "in": "body",
+            "description": "The Topup to be modify.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceTopupStatusType"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful status modification"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Update the information about a single top-up operation previously processed by the server.",
+        "tags": [
+          "Balance TopUps Methods"
+        ]
+      }
+    },
+    "/product/{productId}/balanceTopup/{topupId}/status": {
+      "get": {
+        "operationId": "retrieveTopupStatusProduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          },
+          {
+            "name": "topupId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "information successfully retrieved",
+            "schema": {
+              "$ref": "#/definitions/BalanceTopupStatusType"
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "retrieve detailed information about a single top-up operation previously processed by the server.",
+        "tags": [
+          "Balance TopUps Methods"
+        ]
+      },
+      "put": {
+        "operationId": "ModifyTopupStatusProduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          },
+          {
+            "name": "topupId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "TopupBody",
+            "in": "body",
+            "description": "The Topup to be modify.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceTopupStatusType"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful status modification"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Update the information about a single top-up operation previously processed by the server.",
+        "tags": [
+          "Balance TopUps Methods"
+        ]
+      }
+    },
+    "/balanceTransfer": {
+      "post": {
+        "operationId": "createTransfer",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "TransferBody",
+            "in": "body",
+            "description": "The Transfer to be modify.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceTransferRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Transfer operation successful (resource created)",
+            "headers": {
+              "location": {
+                "description": "Location where to query the created transfer",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "request a new transfer operation for a given product (or commercial id reference to a product instance consuming the credit held in a bucket for a specific service).",
+        "tags": [
+          "Balance Transfers Methods"
+        ]
+      },
+      "get": {
+        "operationId": "retrieveTransferOperations",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "product.id",
+            "required": true,
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "information successfully retrieved",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BalanceTransferRequest"
+              }
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "retrieve detailed information about a single top-up operation previously processed by the server.",
+        "tags": [
+          "Balance Transfers Methods"
+        ]
+      }
+    },
+    "/{productId}/balanceTransfer": {
+      "post": {
+        "operationId": "createTransferProduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "TransferBody",
+            "in": "body",
+            "description": "The Transfer to be modify.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceTransferRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Transfer operation successful (resource created)",
+            "headers": {
+              "location": {
+                "description": "Location where to query the created transfer",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "request a new transfer operation for a given product (or commercial id reference to a product instance consuming the credit held in a bucket for a specific service).",
+        "tags": [
+          "Balance Transfers Methods"
+        ]
+      }
+    },
+    "/product/{productId}/balanceTransfer": {
+      "get": {
+        "operationId": "retrieveTransferOperationsProduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "information successfully retrieved",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BalanceTransferRequest"
+              }
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "retrieve detailed information about a single top-up operation previously processed by the server.",
+        "tags": [
+          "Balance Transfers Methods"
+        ]
+      }
+    },
+    "/balanceTransfer/{transferId}": {
+      "get": {
+        "operationId": "retrieveTransferInformation",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transferId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transfer information was returned successfully",
+            "schema": {
+              "$ref": "#/definitions/BalanceTransferRequest"
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "retrieve detailed information about a single top-up operation previously processed by the server.",
+        "tags": [
+          "Balance Transfers Methods"
+        ]
+      },
+      "patch": {
+        "operationId": "PartiallyModifyTransfer",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transferId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          },
+          {
+            "name": "TransferBody",
+            "in": "body",
+            "description": "The Transfer to be modify.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceTransferRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful top-up operation request (resource modified)"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Partially update the information about a single top-up operation previously processed by the server.",
+        "tags": [
+          "Balance Transfers Methods"
+        ]
+      },
+      "put": {
+        "operationId": "ModifyTransfer",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transferId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          },
+          {
+            "name": "TopupBody",
+            "in": "body",
+            "description": "The Topup to be modify.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceTransferRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful top-up operation request (resource modified)"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Update the information about a single top-up operation previously processed by the server.",
+        "tags": [
+          "Balance Transfers Methods"
+        ]
+      }
+    },
+    "/balanceTransfer/{transferId}/status": {
+      "get": {
+        "operationId": "retrieveTransferStatus",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transferId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "information successfully retrieved",
+            "schema": {
+              "$ref": "#/definitions/BalanceTransferRequest"
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "request the the status of a transfer operation previously processed by the server and if it status has been changed (i.e.: it has been cancelled) the date of the latest status change.",
+        "tags": [
+          "Balance Transfers Methods"
+        ]
+      },
+      "put": {
+        "operationId": "ModifyTransferStatus",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transferId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          },
+          {
+            "name": "TransferStatusBody",
+            "in": "body",
+            "description": "The transfer to be modify.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceTransferRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful status modification"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "modify the status of a balance transfer operation previously processed by the server. This could be used to cancel an existing transfer operation.",
+        "tags": [
+          "Balance Transfers Methods"
+        ]
+      }
+    },
+    "/balanceAdjustment": {
+      "post": {
+        "operationId": "CreateAdjustment",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "AdjustmentBody",
+            "in": "body",
+            "description": "The Adjustment to be created.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceAdjustmentRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful adjustment operation (resource created)",
+            "headers": {
+              "location": {
+                "description": "Location where to query the created transfer",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Perform a balance adjustment for a given bucket on a product (or commercial id reference to a product instance consuming the credit held in a bucket for a specific service).",
+        "tags": [
+          "Balance Adjustments Methods"
+        ]
+      },
+      "get": {
+        "operationId": "retrieveAdjustmentOperations",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "product.id",
+            "required": true,
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "information successfully retrieved",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BalanceAdjustmentRequest"
+              }
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "Retrieve the list of adjustment operations requested for a given product (or commercial id reference to a product), filtered by given criteria. The response includes the details of all balance adjustment operations requested",
+        "tags": [
+          "Balance Adjustments Methods"
+        ]
+      }
+    },
+    "/product/{productId}/balanceAdjustment": {
+      "post": {
+        "operationId": "CreateAdjustmentProduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          },
+          {
+            "name": "AdjustmentBody",
+            "in": "body",
+            "description": "The Adjustment to be created.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceAdjustmentRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful adjustment operation (resource created)",
+            "headers": {
+              "location": {
+                "description": "Location where to query the created transfer",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Perform a balance adjustment for a given bucket on a product (or commercial id reference to a product instance consuming the credit held in a bucket for a specific service).",
+        "tags": [
+          "Balance Adjustments Methods"
+        ]
+      },
+      "get": {
+        "operationId": "retrieveAdjustmentOperationsProduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "information successfully retrieved",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/BalanceAdjustmentRequest"
+              }
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "Retrieve the list of adjustment operations requested for a given product (or commercial id reference to a product), filtered by given criteria. The response includes the details of all balance adjustment operations requested",
+        "tags": [
+          "Balance Adjustments Methods"
+        ]
+      }
+    },
+    "/balanceAdjustment/{adjustmentId}": {
+      "get": {
+        "operationId": "retrieveAdjustment",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "adjustmentId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "information successfully retrieved",
+            "schema": {
+              "$ref": "#/definitions/BalanceAdjustmentRequest"
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "Retrieve detailed information about a single adjustment operation previously processed by the server.",
+        "tags": [
+          "Balance Adjustments Methods"
+        ]
+      }
+    },
+    "/product/{productId}/balanceAdjustment/{adjustmentId}": {
+      "get": {
+        "operationId": "retrieveAdjustmentProduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          },
+          {
+            "name": "adjustmentId",
+            "required": true,
+            "in": "path",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "information successfully retrieved",
+            "schema": {
+              "$ref": "#/definitions/BalanceAdjustmentRequest"
+            }
+          },
+          "400": {
+            "description": "Request Error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "500": {
+            "description": "The server encountered an unexpected condition which prevented it from fulfilling the request"
+          }
+        },
+        "summary": "Retrieve detailed information about a single adjustment operation previously processed by the server.",
+        "tags": [
+          "Balance Adjustments Methods"
+        ]
+      }
+    },
+    "/balanceReserve": {
+      "post": {
+        "operationId": "CreateReserveOperation",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "reserveBody",
+            "in": "body",
+            "description": "The Adjustment to be created.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceReserveRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful balance reserve operation request (resource created)",
+            "headers": {
+              "location": {
+                "description": "Location where to query the created transfer",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Balance reserve operations processed for a given bucket.",
+        "tags": [
+          "Balance Reserve Methods"
+        ]
+      }
+    },
+    "/balanceUnreserve": {
+      "post": {
+        "operationId": "CreateUnreserveOperation",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "reserveBody",
+            "in": "body",
+            "description": "The Adjustment to be created.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceUnreserveRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful balance unreserve operation request (resource created)",
+            "headers": {
+              "location": {
+                "description": "Location where to query the created transfer",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Balance unreserve operations processed for a given bucket.",
+        "tags": [
+          "Balance Unreserve Methods"
+        ]
+      }
+    },
+    "/balanceDeduct": {
+      "post": {
+        "operationId": "DeductBalanceAmount",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "DeductBalanceBody",
+            "in": "body",
+            "description": "The Adjustment to be created.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BalanceDeductRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Balance deduct successfully",
+            "headers": {
+              "location": {
+                "description": "Location where to query the created transfer",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Deduct balance amount stored in the server for a specific bucket under a product referenced by a product id of an individual asset created (e.g. license id for a TV service) or commercial identifier based on the value of a resource created under the product (i.e. MSISDN) that maps to an internal product id.",
+        "tags": [
+          "Balance Deduct Methods"
+        ]
+      }
+    },
+    "/hub": {
+      "post": {
+        "operationId": "createNotification",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "NotificationBody",
+            "in": "body",
+            "description": "The Notification to be created.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NotificationRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/NotificationResponse"
+            },
+            "headers": {
+              "location": {
+                "description": "Location where to query the created transfer",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Sets the communication endpoint address the service instance must use to deliver information about its health state, execution state, failures and metrics. Subsequent POST calls will be rejected by the service if it does not support multiple listeners. In this case DELETE /api/hub/{id} must be called before an endpoint can be created again.",
+        "tags": [
+          "API Notification"
+        ]
+      }
+    },
+    "/hub/{id}": {
+      "delete": {
+        "operationId": "deleteNotification",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Notification deleted successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Clears the communication endpoint address that was set by creating the Hub.",
+        "tags": [
+          "API Notification"
+        ]
+      }
+    },
+    "/client/listener": {
+      "post": {
+        "operationId": "createClientListener",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ListenerBody",
+            "in": "body",
+            "description": "The Client Listener to be created.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ListenerRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "405": {
+            "description": "Method not Allowed"
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Clears the communication endpoint address that was set by creating the Hub. Provides to a registered listener the description of the event that was raised. The /client/listener url is the callback url passed when registering the listener.",
+        "tags": [
+          "API Notification"
+        ]
+      }
+    }
+  },
+  "schemes": [
+    "https"
+  ],
+  "swagger": "2.0",
+  "tags": [
+    {
+      "name": "Balance Buckets Methods",
+      "description": "To be used typically by privileged users"
+    },
+    {
+      "name": "Accumulated Balances Methods",
+      "description": "To be used typically by final users"
+    },
+    {
+      "name": "Balance Activity Methods",
+      "description": "To be used typically by final users"
+    },
+    {
+      "name": "Balance TopUps Methods",
+      "description": "To be used typically by final users"
+    },
+    {
+      "name": "Balance Transfers Methods",
+      "description": "To be used typically by final users"
+    },
+    {
+      "name": "Balance Adjustments Methods",
+      "description": "To be used typically by final users"
+    },
+    {
+      "name": "Balance Reserve Methods",
+      "description": "To be used typically by final users"
+    },
+    {
+      "name": "Balance Unreserve Methods",
+      "description": "To be used typically by final users"
+    },
+    {
+      "name": "Balance Deduct Methods",
+      "description": "To be used typically by final users"
+    },
+    {
+      "name": "API Notification",
+      "description": "To be used typically by final users"
+    }
+  ]
+}
