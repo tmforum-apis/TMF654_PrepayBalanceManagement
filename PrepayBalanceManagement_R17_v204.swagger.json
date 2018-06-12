@@ -28,7 +28,7 @@
         },
         "bucketType": {
           "type": "string",
-          "description": "Type of prepay balance bucket (e.g.: promotion, deposit, bonus, data, voice, or any other service type ‚Ä¶)"
+          "description": "Type of prepay balance bucket (e.g.: promotion, deposit, bonus, data, voice, or any other service type)"
         },
         "remainedAmount": {
           "$ref": "#/definitions/QuantityType",
@@ -69,7 +69,7 @@
           "items": {
             "$ref": "#/definitions/RelatedPartyRefType"
           },
-          "description": "Used to provide information about any other entity with relation to the balance, for instance to define customer hierarchy for the balance (e.g.: customerId, userId, ‚Ä¶)"
+          "description": "Used to provide information about any other entity with relation to the balance, for instance to define customer hierarchy for the balance (e.g.: customerId, userId, )"
         }
       },
       "required": [
@@ -122,7 +122,7 @@
           "items": {
             "$ref": "#/definitions/RelatedPartyRefType"
           },
-          "description": "Used to provide information about any other entity with relation to the balance, for instance to define customer hierarchy for the balance (e.g.: customerId, userId, ‚Ä¶)"
+          "description": "Used to provide information about any other entity with relation to the balance, for instance to define customer hierarchy for the balance (e.g.: customerId, userId, )"
         }
       },
       "required": [
@@ -132,7 +132,37 @@
         "product"
       ]
     },
+    "BalanceTopupBody": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "A preconfigured value that describes a TopUp type which determines the prepay balance bucket in which the top-up is done (national-voice, roaming-voice, promotional-voice, data, ....)"
+        },
+        "channel": {
+          "$ref": "#/definitions/ChannelRefType",
+          "description": "Indicator for the channel used to request the top-up operation. Structure including at least attribute ìnameî"
+        },
+        "amount": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Amount (can be monetary or non-monetary) to be recharged in the bucket"
+        },
+        "product": {
+          "$ref": "#/definitions/ProductRefType",
+          "description": "A reference to the product related to the bucket that is impacted by the balance related operation"
+        }
+      },
+      "required": [
+        "type",
+        "channel",
+        "amount"
+      ]
+    },
     "BalanceTopupRequest": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BalanceTopupBody"
+        }
+      ],
       "description": "Represents a detailed description of a recharge operation requested over a bucket (defined by a specific product or reference to a product (i.e.: a commercial id such as an msisidn) and a service type)",
       "properties": {
         "id": {
@@ -143,25 +173,13 @@
           "type": "string",
           "description": "A resource URI pointing to the resource in the OB that stores the detailed information. This is typically the resource url to retrieve individual top-up operation details"
         },
-        "type": {
-          "type": "string",
-          "description": "A preconfigured value that describes a TopUp type which determines the prepay balance bucket in which the top-up is done (national-voice, roaming-voice, promotional-voice, data, ....)"
-        },
         "description": {
           "type": "string",
           "description": "Description of the recharge operation"
         },
-        "channel": {
-          "$ref": "#/definitions/ChannelRefType",
-          "description": "Indicator for the channel used to request the top-up operation. Structure including at least attribute ‚Äúname‚Äù"
-        },
         "requestor": {
           "$ref": "#/definitions/RelatedPartyRefType",
-          "description": "Identifier for the user/customer/entity that performs the top-up action. This can be used to indicate the identifier of an agent that performs the operation on behalf of a user via a customer service channel. Structure including at least attributes ‚Äúrole‚Äù and ‚Äúname‚Äù."
-        },
-        "amount": {
-          "$ref": "#/definitions/QuantityType",
-          "description": "Amount (can be monetary or non-monetary) to be recharged in the bucket"
+          "description": "Identifier for the user/customer/entity that performs the top-up action. This can be used to indicate the identifier of an agent that performs the operation on behalf of a user via a customer service channel. Structure including at least attributes ìroleî and ìnameî."
         },
         "isAutoTopup": {
           "type": "boolean",
@@ -169,7 +187,7 @@
         },
         "recurringPeriod": {
           "type": "string",
-          "description": "For autotopup indicates the periodicity for the recharge operation (monthly, weekly, ‚Ä¶)"
+          "description": "For autotopup indicates the periodicity for the recharge operation (monthly, weekly, )"
         },
         "nrOfPeriods": {
           "type": "integer",
@@ -177,7 +195,7 @@
         },
         "paymentMethod": {
           "$ref": "#/definitions/PaymentMethodRefOrValueType",
-          "description": "Payment method used for the recharge operation (e.g.: cash, credit card, ‚Ä¶). Structure including at least attribute ‚Äúname‚Äù. Notice that the use of a voucher can be managed as a specific methodtype, where he voucher code can be passed as value."
+          "description": "Payment method used for the recharge operation (e.g.: cash, credit card, Ö). Structure including at least attribute ìnameî. Notice that the use of a voucher can be managed as a specific methodtype, where he voucher code can be passed as value."
         },
         "voucher": {
           "type": "string",
@@ -204,10 +222,6 @@
           ],
           "description": "Status of the top-up operation Supported values are: - confirmed - cancelled - in progress"
         },
-        "product": {
-          "$ref": "#/definitions/ProductRefType",
-          "description": "A reference to the product related to the bucket that is impacted by the balance related operation"
-        },
         "bucket": {
           "$ref": "#/definitions/BucketBalanceRefType",
           "description": "A reference to the bucket impacted by the request. This is used in scenarios where the requestor knows beforehand the bucket that is going to be impacted instead of just referring to the commercial identifier of the impacted product and the type of bucket created under that product"
@@ -227,17 +241,48 @@
       "required": [
         "id",
         "href",
-        "type",
-        "channel",
-        "amount",
         "validFor",
         "requestedDate",
         "confirmationDate",
-        "status",
-        "product"
+        "status"
+      ]
+    },
+    "BalanceTransferBody": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "A preconfigured value that describes a TopUp type which determines the prepay balance bucket in which the top-up is done (national-voice, roaming-voice, promotional-voice, data, ....)"
+        },
+        "channel": {
+          "$ref": "#/definitions/ChannelRefType",
+          "description": "Indicator for the channel used to request the top-up operation. Structure including at least attribute ìnameî"
+        },
+        "targetId": {
+          "type": "string",
+          "description": "Identifier for the entity that receives the transfer (reference to a product via a commercial identifier such as an msisidn that relates to an internal product id)"
+        },
+        "amount": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Amount (can be monetary or non-monetary) to be transferred"
+        },
+        "product": {
+          "$ref": "#/definitions/ProductRefType",
+          "description": "A reference to the product related to the bucket that is impacted by the balance related operation"
+        }
+      },
+      "required": [
+        "type",
+        "channel",
+        "targetId",
+        "amount"
       ]
     },
     "BalanceTransferRequest": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BalanceTransferBody"
+        }
+      ],
       "description": "The BalanceTransfer resource is a detailed description of credit transfer operation requested between two buckets (reference to products owned by customers and consuming credit when using a service).",
       "properties": {
         "id": {
@@ -248,10 +293,6 @@
           "type": "string",
           "description": "A resource URI pointing to the resource in the OB that stores the detailed information. This is typically the resource url to retrieve individual transfer operation details"
         },
-        "type": {
-          "type": "string",
-          "description": "A preconfigured value that describes a TopUp type which determines the prepay balance bucket in which the top-up is done (national-voice, roaming-voice, promotional-voice, data, ....)"
-        },
         "description": {
           "type": "string",
           "description": "Description of the transfer operation"
@@ -260,17 +301,9 @@
           "type": "string",
           "description": "Text describing the reason for the adjustment"
         },
-        "channel": {
-          "$ref": "#/definitions/ChannelRefType",
-          "description": "Indicator for the channel used to request the top-up operation. Structure including at least attribute ‚Äúname‚Äù"
-        },
         "requestor": {
           "$ref": "#/definitions/RelatedPartyRefType",
-          "description": "Identifier for the user/customer/entity that performs the top-up action. This can be used to indicate the identifier of an agent that performs the operation on behalf of a user via a customer service channel. Structure including at least attributes ‚Äúrole‚Äù and ‚Äúname‚Äù."
-        },
-        "targetId": {
-          "type": "string",
-          "description": "Identifier for the entity that receives the transfer (reference to a product via a commercial identifier such as an msisidn that relates to an internal product id)"
+          "description": "Identifier for the user/customer/entity that performs the top-up action. This can be used to indicate the identifier of an agent that performs the operation on behalf of a user via a customer service channel. Structure including at least attributes ìroleî and ìnameî."
         },
         "targetType": {
           "type": "string",
@@ -279,10 +312,6 @@
         "receiver": {
           "$ref": "#/definitions/RelatedPartyRefType",
           "description": "Identifier for the user/customer/entity that receives the transfer action when it is required to indicate additional customer hierarchy information regarding the entity receiving the balance transfer"
-        },
-        "amount": {
-          "$ref": "#/definitions/QuantityType",
-          "description": "Amount (can be monetary or non-monetary) to be transferred"
         },
         "transferCost": {
           "$ref": "#/definitions/QuantityType",
@@ -313,10 +342,6 @@
           ],
           "description": "Status of the top-up."
         },
-        "product": {
-          "$ref": "#/definitions/ProductRefType",
-          "description": "A reference to the product related to the bucket that is impacted by the balance related operation"
-        },
         "bucket": {
           "$ref": "#/definitions/BucketBalanceRefType",
           "description": "A reference to the bucket impacted by the request. This is used in scenarios where the requestor knows beforehand the bucket that is going to be impacted instead of just referring to the commercial identifier of the impacted product and the type of bucket created under that product"
@@ -336,18 +361,44 @@
       "required": [
         "id",
         "href",
-        "type",
         "reason",
-        "channel",
-        "targetId",
-        "amount",
         "requestedDate",
         "confirmationDate",
         "status",
         "product"
       ]
     },
+    "BalanceAdjustmentBody": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "A preconfigured value that describes a TopUp type which determines the prepay balance bucket in which the top-up is done (national-voice, roaming-voice, promotional-voice, data, ....)"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Text describing the reason for the adjustment"
+        },
+        "amount": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Amount (can be monetary or non-monetary) to be recharged in the bucket. It could refer to positive (increment) or negative (decrement) values"
+        },
+        "product": {
+          "$ref": "#/definitions/ProductRefType",
+          "description": "A reference to the product related to the bucket that is impacted by the balance related operation"
+        }
+      },
+      "required": [
+        "type",
+        "reason",
+        "amount"
+      ]
+    },
     "BalanceAdjustmentRequest": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BalanceAdjustmentBody"
+        }
+      ],
       "description": "the BalanceAdjustment resource is a detailed description of credit adjustment operation erformed on a given bucket (defined by a specific product or reference to a product (i.e.: a commercial id such as an msisidn) and a service type)",
       "properties": {
         "id": {
@@ -358,25 +409,13 @@
           "type": "string",
           "description": "A resource URI pointing to the resource in the OB that stores the detailed information. This is typically the resource url to retrieve individual top-up operation details"
         },
-        "type": {
-          "type": "string",
-          "description": "A preconfigured value that describes a TopUp type which determines the prepay balance bucket in which the top-up is done (national-voice, roaming-voice, promotional-voice, data, ....)"
-        },
         "description": {
           "type": "string",
           "description": "Description of the recharge operation"
         },
-        "reason": {
-          "type": "string",
-          "description": "Text describing the reason for the adjustment"
-        },
         "requestor": {
           "$ref": "#/definitions/RelatedPartyRefType",
-          "description": "Identifier for the user/customer/entity that performs the top-up action. This can be used to indicate the identifier of an agent that performs the operation on behalf of a user via a customer service channel. Structure including at least attributes ‚Äúrole‚Äù and ‚Äúname‚Äù."
-        },
-        "amount": {
-          "$ref": "#/definitions/QuantityType",
-          "description": "Amount (can be monetary or non-monetary) to be recharged in the bucket. It could refer to positive (increment) or negative (decrement) values"
+          "description": "Identifier for the user/customer/entity that performs the top-up action. This can be used to indicate the identifier of an agent that performs the operation on behalf of a user via a customer service channel. Structure including at least attributes ìroleî and ìnameî."
         },
         "validFor": {
           "$ref": "#/definitions/TimePeriodType",
@@ -385,10 +424,6 @@
         "requestedDate": {
           "type": "string",
           "description": "Date when the top-up request was received in the server"
-        },
-        "product": {
-          "$ref": "#/definitions/ProductRefType",
-          "description": "A reference to the product related to the bucket that is impacted by the balance related operation"
         },
         "bucket": {
           "$ref": "#/definitions/BucketBalanceRefType",
@@ -409,9 +444,6 @@
       "required": [
         "id",
         "href",
-        "type",
-        "reason",
-        "amount",
         "requestedDate",
         "product"
       ]
@@ -472,13 +504,35 @@
         "product"
       ]
     },
-    "BalanceReserveRequest": {
-      "description": "The Balance Reserve Operation resource is a detailed description of a balance reserve operation requested over a bucket (defined by a specific product or reference to a product (i.e.: a commercial id such as an msisidn) and a service type)",
+    "BalanceReserveBody": {
       "properties": {
         "id": {
           "type": "string",
           "description": "Unique Identifier within the server for the reserve operation request"
         },
+        "relatedParty": {
+          "$ref": "#/definitions/RelatedPartyRefType",
+          "description": "Used to provide information about any other entity with relation to the operation"
+        },
+        "reservedAmount": {
+          "$ref": "#/definitions/QuantityType",
+          "description": "Amount (can be monetary or non-monetary) to be reserved in the bucket"
+        }
+      },
+      "required": [
+        "id",
+        "relatedParty",
+        "reservedAmount"
+      ]
+    },
+    "BalanceReserveRequest": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BalanceReserveBody"
+        }
+      ],
+      "description": "The Balance Reserve Operation resource is a detailed description of a balance reserve operation requested over a bucket (defined by a specific product or reference to a product (i.e.: a commercial id such as an msisidn) and a service type)",
+      "properties": {
         "href": {
           "type": "string",
           "description": "A resource URI pointing to the resource in the OB that stores the detailed information about a reserve"
@@ -493,11 +547,7 @@
         },
         "requestor": {
           "$ref": "#/definitions/RelatedPartyRefType",
-          "description": "Identifier for the user/customer/entity that performs the top-up action. This can be used to indicate the identifier of an agent that performs the operation on behalf of a user via a customer service channel. Structure including at least attributes ‚Äúrole‚Äù and ‚Äúname‚Äù."
-        },
-        "reservedAmount": {
-          "$ref": "#/definitions/QuantityType",
-          "description": "Amount (can be monetary or non-monetary) to be reserved in the bucket"
+          "description": "Identifier for the user/customer/entity that performs the top-up action. This can be used to indicate the identifier of an agent that performs the operation on behalf of a user via a customer service channel. Structure including at least attributes ìroleî and ìnameî."
         },
         "remainedAmount": {
           "$ref": "#/definitions/QuantityType",
@@ -563,25 +613,41 @@
         "partyAccount": {
           "$ref": "#/definitions/PartyAccountRefType",
           "description": "A reference to the account that owns the bucket impacted by the balance related operation"
-        },
-        "relatedParty": {
-          "$ref": "#/definitions/RelatedPartyRefType",
-          "description": "Used to provide information about any other entity with relation to the operation"
         }
       },
       "required": [
-        "id",
-        "href",
-        "reservedAmount"
+        "href"
       ]
     },
-    "BalanceUnreserveRequest": {
-      "description": "The Balance Unreserve Operation resource is a detailed description of a balance unreserve operation requested over a product",
+    "BalanceUnreserveBody": {
       "properties": {
         "id": {
           "type": "string",
           "description": "Unique Identifier within the server for the unreserve operation request"
         },
+        "relatedParty": {
+          "$ref": "#/definitions/RelatedPartyRefType",
+          "description": "Used to provide information about any other entity with relation to the operation"
+        },
+        "balanceReserve": {
+          "$ref": "#/definitions/BalanceReserveRefType",
+          "description": "A reference to the balancereserve that identifies the balance reserve operation"
+        }
+      },
+      "required": [
+        "id",
+        "relatedParty",
+        "balanceReserve"
+      ]
+    },
+    "BalanceUnreserveRequest": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BalanceUnreserveBody"
+        }
+      ],
+      "description": "The Balance Unreserve Operation resource is a detailed description of a balance unreserve operation requested over a product",
+      "properties": {
         "href": {
           "type": "string",
           "description": "A resource URI pointing to the resource in the OB that stores the detailed information about a unreserve"
@@ -634,6 +700,21 @@
         "bucket": {
           "$ref": "#/definitions/BucketBalanceRefType",
           "description": "A reference to the bucket impacted by the request. This is used in scenarios where the requestor knows beforehand the bucket that is going to be impacted instead of just referring to the commercial identifier of the impacted product and the type of bucket created under that product"
+        }
+      },
+      "required": [
+        "href"
+      ]
+    },
+    "BalanceDeductBody": {
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique Identifier within the server for the deduction operation request"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Text describing the reason for the deduction"
         },
         "relatedParty": {
           "$ref": "#/definitions/RelatedPartyRefType",
@@ -646,17 +727,19 @@
       },
       "required": [
         "id",
-        "href",
+        "reason",
+        "relatedParty",
         "balanceReserve"
       ]
     },
     "BalanceDeductRequest": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BalanceDeductBody"
+        }
+      ],
       "description": "The Balance Deduct task resource is a detailed description of deduction operation. If balanceReserve Resource ID is contained in the deduct request message, the reserved balance will be performed deduct operation (if part of the reserved balance is deducted, the remaining amount will be released); if balanceReserve Resource ID is not contained in the deduct request message, the balance will be deducted directly.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique Identifier within the server for the deduction operation request"
-        },
         "href": {
           "type": "string",
           "description": "A resource URI pointing to the resource in the OB that stores the detailed information about a deduction"
@@ -669,17 +752,13 @@
           "type": "string",
           "description": "Description of the deduct operation"
         },
-        "reason": {
-          "type": "string",
-          "description": "Text describing the reason for the deduction"
-        },
         "deductAmount": {
           "$ref": "#/definitions/QuantityType",
           "description": "Amount (can be monetary or non-monetary) to be deducted, if balancereserve ID is not Null, the operation is based on balancereserve resource; otherwise, the operation deducts directly amount given."
         },
         "requestor": {
           "$ref": "#/definitions/RelatedPartyRefType",
-          "description": "Identifier for the user/customer/entity that performs the top-up action. This can be used to indicate the identifier of an agent that performs the operation on behalf of a user via a customer service channel. Structure including at least attributes ‚Äúrole‚Äù and ‚Äúname‚Äù."
+          "description": "Identifier for the user/customer/entity that performs the top-up action. This can be used to indicate the identifier of an agent that performs the operation on behalf of a user via a customer service channel. Structure including at least attributes ìroleî and ìnameî."
         },
         "requestedDate": {
           "type": "string",
@@ -733,20 +812,10 @@
         "partyAccount": {
           "$ref": "#/definitions/PartyAccountRefType",
           "description": "A reference to the account that owns the bucket impacted by the balance related operation"
-        },
-        "relatedParty": {
-          "$ref": "#/definitions/RelatedPartyRefType",
-          "description": "Used to provide information about any other entity with relation to the operation"
-        },
-        "balanceReserve": {
-          "$ref": "#/definitions/BalanceReserveRefType",
-          "description": "A reference to the balancereserve that identifies the balance reserve operation"
         }
       },
       "required": [
-        "id",
-        "href",
-        "balanceReserve"
+        "href"
       ]
     },
     "BalanceReserveRefType": {
@@ -821,7 +890,7 @@
         },
         "type": {
           "type": "string",
-          "description": "Type of payment method (bankcard, voucher, ‚Ä¶)"
+          "description": "Type of payment method (bankcard, voucher, Ö)"
         },
         "details": {
           "$ref": "#/definitions/RelatedPartyRefType",
@@ -833,20 +902,41 @@
         "href"
       ]
     },
-    "BalanceTopupStatusType": {
-      "description": "Structure including specific information about change of status for the topup operation",
+    "BalanceTransferStatusTypeModify": {
+      "properties": {
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "status"
+      ]
+    },
+    "BalanceTopupStatusTypeModify": {
       "properties": {
         "status": {
           "type": "string",
           "description": "Current status of the operation request"
-        },
+        }
+      },
+      "required": [
+        "status"
+      ]
+    },
+    "BalanceTopupStatusType": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/BalanceTopupStatusTypeModify"
+        }
+      ],
+      "description": "Structure including specific information about change of status for the topup operation",
+      "properties": {
         "statusChangeDate": {
           "type": "string",
           "description": "Date in which the latest change of status was requested"
         }
       },
       "required": [
-        "status",
         "statusChangeDate"
       ]
     },
@@ -1139,6 +1229,9 @@
           "403": {
             "description": "Forbidden"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "405": {
             "description": "Method not Allowed"
           },
@@ -1256,6 +1349,9 @@
           "403": {
             "description": "Forbidden"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "405": {
             "description": "Method not Allowed"
           },
@@ -1367,6 +1463,9 @@
           },
           "403": {
             "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "405": {
             "description": "Method not Allowed"
@@ -1510,7 +1609,7 @@
             "description": "The Topup to be created.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/BalanceTopupRequest"
+              "$ref": "#/definitions/BalanceTopupBody"
             }
           }
         ],
@@ -1628,7 +1727,7 @@
             "description": "The Topup to be created.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/BalanceTopupRequest"
+              "$ref": "#/definitions/BalanceTopupBody"
             }
           }
         ],
@@ -1752,6 +1851,9 @@
           "403": {
             "description": "Forbidden"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "405": {
             "description": "Method not Allowed"
           },
@@ -1760,112 +1862,6 @@
           }
         },
         "summary": "retrieve detailed information about a single top-up operation previously processed by the server.",
-        "tags": [
-          "Balance TopUps Methods"
-        ]
-      },
-      "patch": {
-        "operationId": "PartiallyModifyTopup",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "topupId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "TopupBody",
-            "in": "body",
-            "description": "The Topup to be modify.",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/BalanceTopupRequest"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful top-up operation request (resource modified)"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "405": {
-            "description": "Method not Allowed"
-          },
-          "409": {
-            "description": "Conflict"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        },
-        "summary": "Partially update the information about a single top-up operation previously processed by the server.",
-        "tags": [
-          "Balance TopUps Methods"
-        ]
-      },
-      "put": {
-        "operationId": "ModifyTopup",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "topupId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "TopupBody",
-            "in": "body",
-            "description": "The Topup to be modify.",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/BalanceTopupRequest"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful top-up operation request (resource modified)"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "405": {
-            "description": "Method not Allowed"
-          },
-          "409": {
-            "description": "Conflict"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        },
-        "summary": "Update the information about a single top-up operation previously processed by the server.",
         "tags": [
           "Balance TopUps Methods"
         ]
@@ -1931,7 +1927,7 @@
             "description": "The Topup to be modify.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/BalanceTopupStatusType"
+              "$ref": "#/definitions/BalanceTopupStatusTypeModify"
             }
           }
         ],
@@ -2039,7 +2035,7 @@
             "description": "The Topup to be modify.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/BalanceTopupStatusType"
+              "$ref": "#/definitions/BalanceTopupStatusTypeModify"
             }
           }
         ],
@@ -2088,7 +2084,7 @@
             "description": "The Transfer to be modify.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/BalanceTransferRequest"
+              "$ref": "#/definitions/BalanceTransferBody"
             }
           }
         ],
@@ -2193,7 +2189,7 @@
             "description": "The Transfer to be modify.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/BalanceTransferRequest"
+              "$ref": "#/definitions/BalanceTransferBody"
             }
           }
         ],
@@ -2311,6 +2307,9 @@
           "403": {
             "description": "Forbidden"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "405": {
             "description": "Method not Allowed"
           },
@@ -2319,112 +2318,6 @@
           }
         },
         "summary": "retrieve detailed information about a single top-up operation previously processed by the server.",
-        "tags": [
-          "Balance Transfers Methods"
-        ]
-      },
-      "patch": {
-        "operationId": "PartiallyModifyTransfer",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "transferId",
-            "required": true,
-            "in": "path",
-            "type": "string"
-          },
-          {
-            "name": "TransferBody",
-            "in": "body",
-            "description": "The Transfer to be modify.",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/BalanceTransferRequest"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful top-up operation request (resource modified)"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "405": {
-            "description": "Method not Allowed"
-          },
-          "409": {
-            "description": "Conflict"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        },
-        "summary": "Partially update the information about a single top-up operation previously processed by the server.",
-        "tags": [
-          "Balance Transfers Methods"
-        ]
-      },
-      "put": {
-        "operationId": "ModifyTransfer",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "transferId",
-            "required": true,
-            "in": "path",
-            "type": "string"
-          },
-          {
-            "name": "TopupBody",
-            "in": "body",
-            "description": "The Topup to be modify.",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/BalanceTransferRequest"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful top-up operation request (resource modified)"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "405": {
-            "description": "Method not Allowed"
-          },
-          "409": {
-            "description": "Conflict"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        },
-        "summary": "Update the information about a single top-up operation previously processed by the server.",
         "tags": [
           "Balance Transfers Methods"
         ]
@@ -2490,7 +2383,7 @@
             "description": "The transfer to be modify.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/BalanceTransferRequest"
+              "$ref": "#/definitions/BalanceTransferStatusTypeModify"
             }
           }
         ],
@@ -2539,7 +2432,7 @@
             "description": "The Adjustment to be created.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/BalanceAdjustmentRequest"
+              "$ref": "#/definitions/BalanceAdjustmentBody"
             }
           }
         ],
@@ -2644,7 +2537,7 @@
             "description": "The Adjustment to be created.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/BalanceAdjustmentRequest"
+              "$ref": "#/definitions/BalanceAdjustmentBody"
             }
           }
         ],
@@ -2760,6 +2653,9 @@
           "403": {
             "description": "Forbidden"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "405": {
             "description": "Method not Allowed"
           },
@@ -2809,6 +2705,9 @@
           "403": {
             "description": "Forbidden"
           },
+          "404": {
+            "description": "Not Found"
+          },
           "405": {
             "description": "Method not Allowed"
           },
@@ -2835,7 +2734,7 @@
             "description": "The Adjustment to be created.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/BalanceReserveRequest"
+              "$ref": "#/definitions/BalanceReserveBody"
             }
           }
         ],
@@ -2844,7 +2743,7 @@
             "description": "Successful balance reserve operation request (resource created)",
             "headers": {
               "location": {
-                "description": "Location where to query the created transfer",
+                "description": "Location where to query the created object",
                 "type": "string"
               }
             }
@@ -2890,7 +2789,7 @@
             "description": "The Adjustment to be created.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/BalanceUnreserveRequest"
+              "$ref": "#/definitions/BalanceUnreserveBody"
             }
           }
         ],
@@ -2945,7 +2844,7 @@
             "description": "The Adjustment to be created.",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/BalanceDeductRequest"
+              "$ref": "#/definitions/BalanceDeductBody"
             }
           }
         ],
